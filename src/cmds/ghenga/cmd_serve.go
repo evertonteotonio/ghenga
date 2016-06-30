@@ -40,7 +40,7 @@ func expireSessions(ctx context.Context, env *server.Env, d time.Duration) {
 	for {
 		select {
 		case <-t.C:
-			n, err := env.DB.ExpireSessions()
+			n, err := env.DB.ExpireSessions(time.Now())
 			if err != nil {
 				log.Printf("ExpireSessions returned error %v", err)
 				continue

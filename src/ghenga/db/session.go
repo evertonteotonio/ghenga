@@ -13,7 +13,7 @@ type SessionDatabase interface {
 	SaveNewSession(string, time.Duration) (*Session, error)
 	FindSession(string) (*Session, error)
 	Invalidate(*Session) error
-	ExpireSessions() (int, error)
+	ExpireSessions(time.Time) (int, error)
 }
 
 // Session contains the authentication token of a logged-in user.
@@ -74,8 +74,8 @@ func (db *Database) FindSession(token string) (*Session, error) {
 }
 
 // ExpireSessions removes expired sessions from the db.
-func (db *Database) ExpireSessions() (sessionsRemoved int, err error) {
-	res := db.dbmap.Dbx.MustExec("DELETE FROM sessions WHERE valid_until < now()")
+func (db *Database) ExpireSessions(until time.Time) (sessionsRemoved int, err error) {
+	res := db.dbmap.Dbx.MustExec("DELETE FROM sessions WHERE valid_until < $1", until)
 	n, err := res.RowsAffected()
 	return int(n), err
 }

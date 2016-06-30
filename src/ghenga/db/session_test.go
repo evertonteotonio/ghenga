@@ -41,7 +41,7 @@ func TestSessionSave(t *testing.T) {
 		tokens = append(tokens, s.Token)
 	}
 
-	n, err := testDB.ExpireSessions()
+	n, err := testDB.ExpireSessions(time.Now())
 	if err != nil {
 		t.Fatalf("error expire sessions: %v", err)
 	}
