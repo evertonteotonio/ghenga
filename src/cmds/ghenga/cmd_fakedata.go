@@ -21,7 +21,7 @@ func init() {
 }
 
 func (opts *cmdFakedata) Execute(args []string) (err error) {
-	dbm, e := OpenDB()
+	dbm, e := db.Open(globalOpts.DB)
 	if e != nil {
 		return e
 	}

@@ -4,7 +4,7 @@ import "ghenga/db"
 
 // Env is an environment for a handler function.
 type Env struct {
-	DB  *db.DB
+	DB  db.DB
 	Cfg Config
 
 	Logger struct {

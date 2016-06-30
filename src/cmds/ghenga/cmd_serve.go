@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"ghenga/db"
 	"ghenga/server"
 	"log"
 	"net/http"
@@ -59,11 +60,11 @@ const sessionExpireInterval = 5 * time.Minute
 func (opts *cmdServe) Execute(args []string) (err error) {
 	lgr := log.New(os.Stderr, "", log.LstdFlags)
 
-	dbmap, e := OpenDB()
+	dbm, e := db.Open(globalOpts.DB)
 	if e != nil {
 		return e
 	}
-	defer CleanupErr(&err, dbmap.Close)
+	defer CleanupErr(&err, dbm.Close)
 
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
@@ -71,7 +72,7 @@ func (opts *cmdServe) Execute(args []string) (err error) {
 	lgr.Printf("starting server at %v:%d", opts.Addr, opts.Port)
 
 	env := &server.Env{
-		DB: dbmap,
+		DB: dbm,
 		Cfg: server.Config{
 			Debug:           globalOpts.Debug,
 			SessionDuration: sessionDuration,
