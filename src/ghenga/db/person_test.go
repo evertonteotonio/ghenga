@@ -238,7 +238,7 @@ func TestPersonUpdate(t *testing.T) {
 	}
 }
 
-func findPerson(t *testing.T, db *DB, id int64) *Person {
+func findPerson(t *testing.T, db DB, id int64) *Person {
 	p, err := db.FindPerson(id)
 	if err != nil {
 		t.Fatal(err)
@@ -247,7 +247,7 @@ func findPerson(t *testing.T, db *DB, id int64) *Person {
 	return p
 }
 
-func updatePerson(t *testing.T, db *DB, p *Person) {
+func updatePerson(t *testing.T, db DB, p *Person) {
 	if err := db.UpdatePerson(p); err != nil {
 		t.Fatal(err)
 	}

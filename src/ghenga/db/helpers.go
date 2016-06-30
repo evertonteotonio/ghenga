@@ -71,7 +71,7 @@ func NewFakeUser(lang string) (*User, error) {
 // InsertFakeData will populate the db with fake (but realistic) data. Among
 // others, users named "admin" and "user" with the password "geheim" are
 // created.
-func InsertFakeData(db *DB, people, user int) error {
+func InsertFakeData(db DB, people, user int) error {
 	for i := 0; i < people; i++ {
 		p, err := NewFakePerson("de")
 		if err != nil {
@@ -148,8 +148,8 @@ func testCleanupDB(db *modl.DbMap) {
 // TestDB returns a database suitable for testing. The database is emptied
 // and filled with fake data. It should be called in TestMain. On error, TestDB
 // panics.
-func TestDB(people, user int) (*DB, func()) {
-	db, err := Init(TestDataSource())
+func TestDB(people, user int) (DB, func()) {
+	db, err := Open(TestDataSource())
 	if err != nil {
 		panic(err)
 	}

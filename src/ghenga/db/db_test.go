@@ -7,7 +7,7 @@ import (
 	"github.com/elithrar/simple-scrypt"
 )
 
-var testDB *DB
+var testDB DB
 
 func TestMain(m *testing.M) {
 	var cleanup func()

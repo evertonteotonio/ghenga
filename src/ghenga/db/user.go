@@ -10,6 +10,16 @@ import (
 	"github.com/jmoiron/modl"
 )
 
+type UserDatabase interface {
+	FindUser(int64) (*User, error)
+	FindUserName(string) (*User, error)
+
+	InsertUser(*User) error
+	ListUsers() ([]*User, error)
+	UpdateUser(*User) error
+	DeleteUser(int64) error
+}
+
 // User is a user of the system in the database.
 type User struct {
 	ID           int64
@@ -199,7 +209,7 @@ func (u *User) Update(other UserJSON) {
 }
 
 // FindUserName searches the database for a user based on their login name.
-func (db *DB) FindUserName(login string) (*User, error) {
+func (db *Database) FindUserName(login string) (*User, error) {
 	var u User
 	err := db.dbmap.SelectOne(&u, "SELECT * FROM users WHERE login = $1", login)
 	if err != nil {
@@ -210,7 +220,7 @@ func (db *DB) FindUserName(login string) (*User, error) {
 }
 
 // FindUser searches the database for a user based on their id.
-func (db *DB) FindUser(id int64) (*User, error) {
+func (db *Database) FindUser(id int64) (*User, error) {
 	var u User
 	err := db.dbmap.SelectOne(&u, "SELECT * FROM users WHERE id = $1", id)
 	if err != nil {
@@ -221,25 +231,25 @@ func (db *DB) FindUser(id int64) (*User, error) {
 }
 
 // ListUsers returns the list of User.
-func (db *DB) ListUsers() ([]*User, error) {
+func (db *Database) ListUsers() ([]*User, error) {
 	var user []*User
 	err := db.dbmap.Select(&user, "select * from users")
 	return user, err
 }
 
 // UpdateUser modifies an existing user.
-func (db *DB) UpdateUser(u *User) error {
+func (db *Database) UpdateUser(u *User) error {
 	_, err := db.dbmap.Update(u)
 	return err
 }
 
 // InsertUser creates a new user.
-func (db *DB) InsertUser(u *User) error {
+func (db *Database) InsertUser(u *User) error {
 	return db.dbmap.Insert(u)
 }
 
 // DeleteUser removes a user.
-func (db *DB) DeleteUser(id int64) error {
+func (db *Database) DeleteUser(id int64) error {
 	res := db.dbmap.Dbx.MustExec("delete from people where id = $1", id)
 	n, err := res.RowsAffected()
 	if err != nil {

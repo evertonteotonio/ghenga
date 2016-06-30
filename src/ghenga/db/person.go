@@ -10,6 +10,18 @@ import (
 	"github.com/jmoiron/sqlx"
 )
 
+// PeopleDatabase allows handling people.
+type PeopleDatabase interface {
+	FindPerson(int64) (*Person, error)
+
+	InsertPerson(*Person) error
+	ListPeople() ([]*Person, error)
+	UpdatePerson(*Person) error
+	DeletePerson(int64) error
+
+	FuzzyFindPersons(query string) ([]*Person, error)
+}
+
 // Person is a person in the database.
 type Person struct {
 	ID           int64
@@ -286,7 +298,7 @@ func (p Person) String() string {
 }
 
 // FindPerson returns the person struct with the given id.
-func (db *DB) FindPerson(id int64) (*Person, error) {
+func (db *Database) FindPerson(id int64) (*Person, error) {
 	var p Person
 
 	err := db.dbmap.SelectOne(&p, "SELECT * FROM people WHERE id = $1", id)
@@ -298,25 +310,25 @@ func (db *DB) FindPerson(id int64) (*Person, error) {
 }
 
 // UpdatePerson modifies an existing person.
-func (db *DB) UpdatePerson(p *Person) error {
+func (db *Database) UpdatePerson(p *Person) error {
 	_, err := db.dbmap.Update(p)
 	return err
 }
 
 // InsertPerson creates a new person.
-func (db *DB) InsertPerson(p *Person) error {
+func (db *Database) InsertPerson(p *Person) error {
 	return db.dbmap.Insert(p)
 }
 
 // ListPeople returns the list of people.
-func (db *DB) ListPeople() ([]*Person, error) {
+func (db *Database) ListPeople() ([]*Person, error) {
 	var people []*Person
 	err := db.dbmap.Select(&people, "select * from people")
 	return people, err
 }
 
 // DeletePerson removes a person.
-func (db *DB) DeletePerson(id int64) error {
+func (db *Database) DeletePerson(id int64) error {
 	res := db.dbmap.Dbx.MustExec("delete from people where id = $1", id)
 	n, err := res.RowsAffected()
 	if err != nil {

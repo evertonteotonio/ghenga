@@ -43,8 +43,8 @@ func findMigrationsDir() (dir string, err error) {
 	return "", fmt.Errorf("directory %q not found", subdir)
 }
 
-// DB is a storage database for ghenga.
-type DB struct {
+// Database is a persistent storage database for ghenga.
+type Database struct {
 	dbmap *modl.DbMap
 }
 
@@ -60,9 +60,9 @@ func configDBMap(db *sql.DB) (*modl.DbMap, error) {
 	return dbmap, nil
 }
 
-// Init opens the database. When the environment variable `DBTRACE` is set to
-// 1, all queries are written to stderr.
-func Init(dataSource string) (*DB, error) {
+// Open opens a PostgreSQL database. When the environment variable `DBTRACE`
+// is set to 1, all queries are written to stderr.
+func Open(dataSource string) (*Database, error) {
 	db, err := sql.Open(dialect, dataSource)
 	if err != nil {
 		return nil, err
@@ -87,7 +87,7 @@ func Init(dataSource string) (*DB, error) {
 		return nil, err
 	}
 
-	return &DB{dbmap}, nil
+	return &Database{dbmap}, nil
 }
 
 // migrateDB applies migrations according to the files in the subdir
@@ -105,6 +105,6 @@ func migrateDB(db *modl.DbMap) error {
 }
 
 // Close closes the connection to the underlying database.
-func (db *DB) Close() error {
+func (db *Database) Close() error {
 	return db.dbmap.Db.Close()
 }

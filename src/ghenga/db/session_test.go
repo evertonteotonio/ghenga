@@ -7,7 +7,7 @@ import (
 
 func TestSession(t *testing.T) {
 	for i := 0; i < 20; i++ {
-		s, err := NewSession("user", 300)
+		s, err := testDB.SaveNewSession("user", 300)
 		if err != nil {
 			t.Fatalf("unable to generate new token: %v", err)
 		}
@@ -26,7 +26,7 @@ func TestSessionSave(t *testing.T) {
 	for i := 0; i < 10; i++ {
 		session, err := testDB.SaveNewSession("user", time.Duration(10*(i-1))*time.Second)
 		if err != nil {
-			t.Fatalf("NewSession() error %v", err)
+			t.Fatalf("SaveNewSession() error %v", err)
 		}
 
 		s, err := testDB.FindSession(session.Token)

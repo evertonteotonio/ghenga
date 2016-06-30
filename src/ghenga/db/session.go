@@ -8,6 +8,14 @@ import (
 	"time"
 )
 
+// SessionDatabase allows handling sessions.
+type SessionDatabase interface {
+	SaveNewSession(string, time.Duration) (*Session, error)
+	FindSession(string) (*Session, error)
+	Invalidate(*Session) error
+	ExpireSessions() (int, error)
+}
+
 // Session contains the authentication token of a logged-in user.
 type Session struct {
 	Token      string
@@ -22,8 +30,8 @@ func (s Session) String() string {
 
 const tokenLength = 32
 
-// NewSession generates a new session for a user.
-func NewSession(user string, valid time.Duration) (*Session, error) {
+// newSession generates a new session for a user.
+func newSession(user string, valid time.Duration) (*Session, error) {
 	buf := make([]byte, tokenLength)
 	_, err := io.ReadFull(rand.Reader, buf)
 	if err != nil {
@@ -40,8 +48,8 @@ func NewSession(user string, valid time.Duration) (*Session, error) {
 }
 
 // SaveNewSession generates a new session for the user and saves it to the db.
-func (db *DB) SaveNewSession(user string, valid time.Duration) (*Session, error) {
-	s, err := NewSession(user, valid)
+func (db *Database) SaveNewSession(user string, valid time.Duration) (*Session, error) {
+	s, err := newSession(user, valid)
 	if err != nil {
 		return nil, err
 	}
@@ -55,7 +63,7 @@ func (db *DB) SaveNewSession(user string, valid time.Duration) (*Session, error)
 }
 
 // FindSession searches the session with the given token in the database.
-func (db *DB) FindSession(token string) (*Session, error) {
+func (db *Database) FindSession(token string) (*Session, error) {
 	var s Session
 	err := db.dbmap.SelectOne(&s, "SELECT * FROM sessions WHERE token = $1", token)
 	if err != nil {
@@ -66,13 +74,14 @@ func (db *DB) FindSession(token string) (*Session, error) {
 }
 
 // ExpireSessions removes expired sessions from the db.
-func (db *DB) ExpireSessions() (sessionsRemoved int64, err error) {
+func (db *Database) ExpireSessions() (sessionsRemoved int, err error) {
 	res := db.dbmap.Dbx.MustExec("DELETE FROM sessions WHERE valid_until < now()")
-	return res.RowsAffected()
+	n, err := res.RowsAffected()
+	return int(n), err
 }
 
 // Invalidate removes the session from the database.
-func (db *DB) Invalidate(s *Session) error {
+func (db *Database) Invalidate(s *Session) error {
 	_, err := db.dbmap.Delete(s)
 	if err != nil {
 		return err

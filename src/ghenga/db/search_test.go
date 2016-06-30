@@ -27,7 +27,7 @@ var searchTestPersons = []Person{
 
 //  fuzzyFindPersons makes sure that at least people are contained within the
 //  result set.
-func fuzzyFindPersons(t *testing.T, db *DB, query string, in []Person, out []Person) {
+func fuzzyFindPersons(t *testing.T, db DB, query string, in []Person, out []Person) {
 	result, err := db.FuzzyFindPersons(query)
 	if err != nil {
 		t.Fatalf("FuzzyFindPersons(%q) returned error %v", query, err)
