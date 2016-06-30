@@ -6,7 +6,7 @@ import (
 	"testing"
 )
 
-func loginRequest(t *testing.T, srv *TestSrv, username, password string) (status int, body []byte) {
+func loginRequest(t testing.TB, srv *TestSrv, username, password string) (status int, body []byte) {
 	req, err := http.NewRequest("GET", srv.URL+"/api/login/token", nil)
 	if err != nil {
 		t.Fatalf("unable to create login request: %v", err)
@@ -40,7 +40,7 @@ type loginResponse struct {
 	ValidFor uint   `json:"valid_for"`
 }
 
-func login(t *testing.T, srv *TestSrv, username, password string) (token string) {
+func login(t testing.TB, srv *TestSrv, username, password string) (token string) {
 	status, body := loginRequest(t, srv, username, password)
 
 	if status != http.StatusOK {
@@ -67,7 +67,7 @@ var invalidUsernamePasswords = []struct {
 	{"", ""},
 }
 
-func TestLogin(t *testing.T) {
+func testLogin(t testing.TB) {
 	srv, cleanup := TestServer(t)
 	defer cleanup()
 
@@ -82,6 +82,16 @@ func TestLogin(t *testing.T) {
 			t.Errorf("invalid response for invalid login request (%v/%v): status %v, body:\n%s",
 				test.u, test.p, status, body)
 		}
+	}
+}
+
+func TestLogin(t *testing.T) {
+	testLogin(t)
+}
+
+func BenchmarkLogin(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		testLogin(b)
 	}
 }
 

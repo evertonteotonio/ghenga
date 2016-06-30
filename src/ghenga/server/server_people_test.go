@@ -21,7 +21,7 @@ func marshal(t *testing.T, item interface{}) []byte {
 	return buf
 }
 
-func unmarshal(t *testing.T, data []byte, item interface{}) {
+func unmarshal(t testing.TB, data []byte, item interface{}) {
 	err := json.Unmarshal(data, item)
 	if err != nil {
 		t.Fatal(err)

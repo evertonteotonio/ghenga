@@ -20,14 +20,14 @@ func cleanupErr(err *error, fn func() error) {
 }
 
 const (
-	fakePersonProfiles = 200
-	fakeUserProfiles   = 5
+	fakePersonProfiles = 50
+	fakeUserProfiles   = 2
 )
 
 // TestEnv returns a test environment running on an in-memory database filled
 // with test data.
-func TestEnv(t *testing.T) (env *Env, cleanup func()) {
-	db, dbcleanup := db.TestDB(fakePersonProfiles, fakeUserProfiles)
+func TestEnv(t testing.TB) (env *Env, cleanup func()) {
+	db := db.NewMockDB(fakePersonProfiles, fakeUserProfiles)
 
 	env = &Env{
 		DB: db,
@@ -41,7 +41,7 @@ func TestEnv(t *testing.T) (env *Env, cleanup func()) {
 		env.Logger.Error = log.New(os.Stdout, "", log.LstdFlags)
 	}
 
-	return env, func() { dbcleanup() }
+	return env, func() {}
 }
 
 // TestSrv bundles a test server with a test environment.
@@ -52,7 +52,7 @@ type TestSrv struct {
 
 // TestServer returns an *httptest.Server running the ghenga API on an
 // in-memory DB filled with fake data.
-func TestServer(t *testing.T) (srv *TestSrv, cleanup func()) {
+func TestServer(t testing.TB) (srv *TestSrv, cleanup func()) {
 	env, envcleanup := TestEnv(t)
 
 	ctx, cancel := context.WithCancel(context.TODO())

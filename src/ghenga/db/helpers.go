@@ -145,7 +145,7 @@ func testCleanupDB(db *modl.DbMap) {
 	}
 }
 
-// TestDB returns a database suitable for testing. The database is emptied
+// TestDB returns a real database suitable for testing. The database is emptied
 // and filled with fake data. It should be called in TestMain. On error, TestDB
 // panics.
 func TestDB(people, user int) (DB, func()) {
@@ -172,4 +172,17 @@ func TestDB(people, user int) (DB, func()) {
 			panic(err)
 		}
 	}
+}
+
+// NewMockDB returns an in-memory database suitable for testing. The database
+// is filled with fake data. It should be called in TestMain. On error,
+// NewMockDB panics.
+func NewMockDB(people, user int) DB {
+	db := &MockDB{}
+	err := InsertFakeData(db, people, user)
+	if err != nil {
+		panic(err)
+	}
+
+	return db
 }
