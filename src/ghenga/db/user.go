@@ -68,9 +68,20 @@ func (u User) CheckPassword(password string) bool {
 	return err == nil
 }
 
+var scryptParameters = scrypt.DefaultParams
+
+func init() {
+	p, err := scrypt.Calibrate(500*time.Millisecond, 64, scrypt.Params{})
+	if err != nil {
+		panic(err)
+	}
+
+	scryptParameters = p
+}
+
 // UpdatePasswordHash updates the password hash for u.
 func (u *User) UpdatePasswordHash(password string) error {
-	hash, err := scrypt.GenerateFromPassword([]byte(password), scrypt.DefaultParams)
+	hash, err := scrypt.GenerateFromPassword([]byte(password), scryptParameters)
 	if err != nil {
 		return err
 	}
