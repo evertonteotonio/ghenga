@@ -28,7 +28,7 @@ func unmarshal(t testing.TB, data []byte, item interface{}) {
 	}
 }
 
-func readBody(t *testing.T, res *http.Response) (int, []byte) {
+func readBody(t testing.TB, res *http.Response) (int, []byte) {
 	responseBody, err := ioutil.ReadAll(res.Body)
 	if err != nil {
 		t.Fatalf("cannot read response body: %v", err)
@@ -42,7 +42,7 @@ func readBody(t *testing.T, res *http.Response) (int, []byte) {
 	return res.StatusCode, responseBody
 }
 
-func request(t *testing.T, token, method, url string, body []byte) (int, []byte) {
+func request(t testing.TB, token, method, url string, body []byte) (int, []byte) {
 	var rd io.Reader
 	if body != nil {
 		rd = bytes.NewReader(body)
@@ -175,6 +175,20 @@ func TestPersonList(t *testing.T) {
 	}
 
 	t.Logf("loaded %d person records", len(list))
+}
+
+func BenchmarkPersonList(b *testing.B) {
+	srv, cleanup := TestServer(b)
+	defer cleanup()
+
+	token := login(b, srv, "admin", "geheim")
+
+	for i := 0; i < b.N; i++ {
+		status, _ := request(b, token, "GET", srv.URL+"/api/person", nil)
+		if status != 200 {
+			b.Fatalf("reading list of persons failed with invalid status: want 200, got %d", status)
+		}
+	}
 }
 
 var invalidPersonTests = []string{
