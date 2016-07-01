@@ -5,9 +5,9 @@ import (
 	"time"
 )
 
-func TestSession(t *testing.T) {
+func testSession(t *testing.T, db DB) {
 	for i := 0; i < 20; i++ {
-		s, err := testDB.SaveNewSession("user", 300)
+		s, err := db.SaveNewSession("user", 300)
 		if err != nil {
 			t.Fatalf("unable to generate new token: %v", err)
 		}
@@ -18,23 +18,32 @@ func TestSession(t *testing.T) {
 			t.Fatalf("invalid token %q", token)
 		}
 
-		err = testDB.Invalidate(s)
+		err = db.Invalidate(s)
 		if err != nil {
 			t.Fatalf("invalidate() %v", err)
 		}
 	}
 }
 
-func TestSessionSave(t *testing.T) {
+func TestDBSession(t *testing.T) {
+	testSession(t, testDB)
+}
+
+func TestMockDBSession(t *testing.T) {
+	db := NewMockDB(20, 5)
+	testSession(t, db)
+}
+
+func testSessionSave(t *testing.T, db DB) {
 	var tokens []string
 
 	for i := 0; i < 10; i++ {
-		session, err := testDB.SaveNewSession("user", time.Duration(i)*time.Second)
+		session, err := db.SaveNewSession("user", time.Duration(i)*time.Second)
 		if err != nil {
 			t.Fatalf("SaveNewSession() error %v", err)
 		}
 
-		s, err := testDB.FindSession(session.Token)
+		s, err := db.FindSession(session.Token)
 		if err != nil {
 			t.Fatalf("unable to find newly generated token in the session database: %v", err)
 		}
@@ -46,7 +55,7 @@ func TestSessionSave(t *testing.T) {
 		tokens = append(tokens, s.Token)
 	}
 
-	n, err := testDB.ExpireSessions(time.Now())
+	n, err := db.ExpireSessions(time.Now())
 	if err != nil {
 		t.Fatalf("error expire sessions: %v", err)
 	}
@@ -55,7 +64,15 @@ func TestSessionSave(t *testing.T) {
 		t.Errorf("expected 2 expired sessions, got %v", n)
 	}
 
-	if _, err = testDB.FindSession(tokens[0]); err == nil {
+	if _, err = db.FindSession(tokens[0]); err == nil {
 		t.Fatalf("expired session token %v still found in database", tokens[0])
 	}
+}
+
+func TestDBSessionSave(t *testing.T) {
+	testSessionSave(t, testDB)
+}
+
+func TestMockDBSessionSave(t *testing.T) {
+	testSessionSave(t, NewMockDB(20, 5))
 }

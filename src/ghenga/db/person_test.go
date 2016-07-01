@@ -73,10 +73,10 @@ var testPersons = []struct {
 	},
 }
 
-func TestPersonInsertSelect(t *testing.T) {
+func testPersonInsertSelect(t *testing.T, db DB) {
 	var ids []int64
 	for _, test := range testPersons {
-		err := testDB.InsertPerson(&test.p)
+		err := db.InsertPerson(&test.p)
 		if err != nil {
 			t.Errorf("saving %v failed: %v", test.name, err)
 			continue
@@ -86,7 +86,7 @@ func TestPersonInsertSelect(t *testing.T) {
 	}
 
 	for i, test := range testPersons {
-		p, err := testDB.FindPerson(ids[i])
+		p, err := db.FindPerson(ids[i])
 		if err != nil {
 			t.Errorf("loading %v failed: %v", test.p.ID, err)
 			continue
@@ -115,17 +115,35 @@ func TestPersonInsertSelect(t *testing.T) {
 	}
 }
 
-func TestPersonVersion(t *testing.T) {
-	p, err := testDB.FindPerson(14)
+func TestDBPersonInsertSelect(t *testing.T) {
+	testPersonInsertSelect(t, testDB)
+}
+
+func TestMockDBPersonInsertSelect(t *testing.T) {
+	db := NewMockDB(20, 5)
+	testPersonInsertSelect(t, db)
+}
+
+func testPersonVersion(t *testing.T, db DB) {
+	p, err := db.FindPerson(14)
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	p.Version = 25
-	err = testDB.UpdatePerson(p)
+	err = db.UpdatePerson(p)
 	if err == nil {
 		t.Fatalf("expected error due to outdated version not found")
 	}
+}
+
+func TestDBPersonVersion(t *testing.T) {
+	testPersonVersion(t, testDB)
+}
+
+func TestMockDBPersonVersion(t *testing.T) {
+	db := NewMockDB(20, 5)
+	testPersonVersion(t, db)
 }
 
 func marshal(t *testing.T, item interface{}) []byte {
@@ -220,22 +238,31 @@ func TestPersonValidate(t *testing.T) {
 	}
 }
 
-func TestPersonUpdate(t *testing.T) {
-	p, err := testDB.FindPerson(12)
+func testPersonUpdate(t *testing.T, db DB) {
+	p, err := db.FindPerson(12)
 	if err != nil {
 		t.Fatalf("unable to load person 12: %v", err)
 	}
 
 	p.Name = "foo bar"
-	if err = testDB.UpdatePerson(p); err != nil {
+	if err = db.UpdatePerson(p); err != nil {
 		t.Fatalf("unable to update person: %v", err)
 	}
 
 	p.Title = "CTO"
 	p.Version = 1
-	if err = testDB.UpdatePerson(p); err == nil {
+	if err = db.UpdatePerson(p); err == nil {
 		t.Fatalf("update did not fail despite wrong version field")
 	}
+}
+
+func TestDBPersonUpdate(t *testing.T) {
+	testPersonUpdate(t, testDB)
+}
+
+func TestMockDBPersonUpdate(t *testing.T) {
+	db := NewMockDB(20, 5)
+	testPersonUpdate(t, db)
 }
 
 func findPerson(t *testing.T, db DB, id int64) *Person {
@@ -253,52 +280,83 @@ func updatePerson(t *testing.T, db DB, p *Person) {
 	}
 }
 
-func TestPersonUpdatePhoneNumbers(t *testing.T) {
-	p := findPerson(t, testDB, 14)
+func testPersonUpdatePhoneNumbers(t *testing.T, db DB) {
+	p := findPerson(t, db, 14)
 	p.PhoneNumbers = append(p.PhoneNumbers, PhoneNumber{Type: "test", Number: "12345"})
 
-	updatePerson(t, testDB, p)
+	updatePerson(t, db, p)
 
-	p2 := findPerson(t, testDB, p.ID)
+	p2 := findPerson(t, db, p.ID)
 	if !p.PhoneNumbers.Equals(p2.PhoneNumbers) {
 		t.Fatalf("changing phone numbers did not work, want:\n%v\n  got:\n%v", p.PhoneNumbers, p2.PhoneNumbers)
 	}
 }
 
-func TestPersonDeletePhoneNumber(t *testing.T) {
-	p := findPerson(t, testDB, 14)
+func TestDBPersonUpdatePhoneNumbers(t *testing.T) {
+	testPersonUpdatePhoneNumbers(t, testDB)
+}
+
+func TestMockDBPersonUpdatePhoneNumbers(t *testing.T) {
+	db := NewMockDB(20, 5)
+	testPersonUpdatePhoneNumbers(t, db)
+}
+
+func testPersonDeletePhoneNumber(t *testing.T, db DB) {
+	p := findPerson(t, db, 14)
 	if len(p.PhoneNumbers) > 0 {
 		p.PhoneNumbers = p.PhoneNumbers[1:]
 	}
 
-	updatePerson(t, testDB, p)
+	updatePerson(t, db, p)
 
-	p2 := findPerson(t, testDB, p.ID)
+	p2 := findPerson(t, db, p.ID)
 	if !p.PhoneNumbers.Equals(p2.PhoneNumbers) {
 		t.Fatalf("changing phone numbers did not work, want:\n%v\n  got:\n%v", p.PhoneNumbers, p2.PhoneNumbers)
 	}
 }
 
-func TestPersonDeleteAllPhoneNumbers(t *testing.T) {
-	p := findPerson(t, testDB, 14)
+func TestDBPersonDeletePhoneNumber(t *testing.T) {
+	testPersonDeletePhoneNumber(t, testDB)
+}
+
+func TestMockDBPersonDeletePhoneNumber(t *testing.T) {
+	db := NewMockDB(20, 5)
+	testPersonDeletePhoneNumber(t, db)
+}
+
+func testPersonDeleteAllPhoneNumbers(t *testing.T, db DB) {
+	p := findPerson(t, db, 14)
 	p.PhoneNumbers = PhoneNumbers{}
 
-	updatePerson(t, testDB, p)
+	updatePerson(t, db, p)
 
-	p2 := findPerson(t, testDB, p.ID)
+	p2 := findPerson(t, db, p.ID)
 	if len(p2.PhoneNumbers) > 0 {
 		t.Fatalf("removing phone numbers did not work, got:\n%v", p2.PhoneNumbers)
 	}
 }
 
-func TestPersonReplacePhoneNumbers(t *testing.T) {
-	p := findPerson(t, testDB, 14)
+func TestDBPersonDeleteAllPhoneNumbers(t *testing.T) {
+	testPersonDeleteAllPhoneNumbers(t, testDB)
+}
+
+func TestMockDBPersonDeleteAllPhoneNumbers(t *testing.T) {
+	db := NewMockDB(20, 5)
+	testPersonDeleteAllPhoneNumbers(t, db)
+}
+
+func testPersonReplacePhoneNumbers(t *testing.T, db DB) {
+	p := findPerson(t, db, 14)
 	p.PhoneNumbers = PhoneNumbers{PhoneNumber{Type: "test", Number: "12345"}}
 
-	updatePerson(t, testDB, p)
+	updatePerson(t, db, p)
 
-	p2 := findPerson(t, testDB, p.ID)
+	p2 := findPerson(t, db, p.ID)
 	if !p.PhoneNumbers.Equals(p2.PhoneNumbers) {
 		t.Fatalf("changing phone numbers did not work, want:\n%v\n  got:\n%v", p.PhoneNumbers, p2.PhoneNumbers)
 	}
+}
+
+func TestDBPersonReplacePhoneNumbers(t *testing.T) {
+	testPersonReplacePhoneNumbers(t, testDB)
 }

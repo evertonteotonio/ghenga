@@ -93,15 +93,24 @@ var fuzzyFindTests = []struct {
 	},
 }
 
-func TestFuzzyFindPersons(t *testing.T) {
+func testFuzzyFindPersons(t *testing.T, db DB) {
 	for _, p := range searchTestPersons {
-		err := testDB.InsertPerson(&p)
+		err := db.InsertPerson(&p)
 		if err != nil {
 			t.Fatalf("insert test persons returned error %v", err)
 		}
 	}
 
 	for _, test := range fuzzyFindTests {
-		fuzzyFindPersons(t, testDB, test.query, test.in, test.out)
+		fuzzyFindPersons(t, db, test.query, test.in, test.out)
 	}
+}
+
+func TestDBFuzzyFindPersons(t *testing.T) {
+	testFuzzyFindPersons(t, testDB)
+}
+
+func TestMockDBFuzzyFindPersons(t *testing.T) {
+	db := NewMockDB(20, 5)
+	testFuzzyFindPersons(t, db)
 }

@@ -7,18 +7,18 @@ import (
 	"testing"
 )
 
-func TestUserAdd(t *testing.T) {
+func testUserAdd(t *testing.T, db DB) {
 	u, err := NewUser("foo", "bar")
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	err = testDB.InsertUser(u)
+	err = db.InsertUser(u)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	u2, err := testDB.FindUserName("foo")
+	u2, err := db.FindUserName("foo")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -30,6 +30,14 @@ func TestUserAdd(t *testing.T) {
 	if u2.CheckPassword("xxx") {
 		t.Fatalf("wrong password for test user was accepted")
 	}
+}
+
+func TestDBUserAdd(t *testing.T) {
+	testUserAdd(t, testDB)
+}
+
+func TestMockDBUserAdd(t *testing.T) {
+	testUserAdd(t, NewMockDB(20, 5))
 }
 
 var testUsers = []struct {
@@ -60,17 +68,25 @@ var testUsers = []struct {
 	},
 }
 
-func TestUserVersion(t *testing.T) {
-	u, err := testDB.FindUserName("admin")
+func testUserVersion(t *testing.T, db DB) {
+	u, err := db.FindUserName("admin")
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	u.Version = 25
-	err = testDB.UpdateUser(u)
+	err = db.UpdateUser(u)
 	if err == nil {
 		t.Fatalf("expected error due to outdated version not found")
 	}
+}
+
+func TestDBUserVersion(t *testing.T) {
+	testUserVersion(t, testDB)
+}
+
+func TestMockDBUserVersion(t *testing.T) {
+	testUserVersion(t, NewMockDB(20, 5))
 }
 
 func TestUserMarshal(t *testing.T) {
@@ -149,21 +165,21 @@ func TestUserValidate(t *testing.T) {
 	}
 }
 
-func TestUserUpdate(t *testing.T) {
-	u, err := testDB.FindUserName("user")
+func testUserUpdate(t *testing.T, db DB) {
+	u, err := db.FindUserName("user")
 	if err != nil {
 		t.Fatalf("unable to load user %q: %v", "user", err)
 	}
 
 	u.Login = "foo bar"
-	if err = testDB.UpdateUser(u); err != nil {
+	if err = db.UpdateUser(u); err != nil {
 		t.Fatalf("unable to update user: %v", err)
 	}
 
 	v := u.Version
 	u.Admin = !u.Admin
 	u.Version = 1
-	if err = testDB.UpdateUser(u); err == nil {
+	if err = db.UpdateUser(u); err == nil {
 		t.Fatalf("update did not fail despite wrong version field")
 	}
 
@@ -171,13 +187,21 @@ func TestUserUpdate(t *testing.T) {
 	u.Login = "user"
 	u.Version = v
 
-	if err = testDB.UpdateUser(u); err != nil {
+	if err = db.UpdateUser(u); err != nil {
 		t.Fatalf("unable to update user: %v", err)
 	}
 }
 
-func TestUserUpdatePassword(t *testing.T) {
-	u, err := testDB.FindUserName("user")
+func TestDBUserUpdate(t *testing.T) {
+	testUserUpdate(t, testDB)
+}
+
+func TestMockDBUserUpdate(t *testing.T) {
+	testUserUpdate(t, NewMockDB(20, 5))
+}
+
+func testUserUpdatePassword(t *testing.T, db DB) {
+	u, err := db.FindUserName("user")
 	if err != nil {
 		t.Fatalf("unable to load user %q: %v", "user", err)
 	}
@@ -187,7 +211,7 @@ func TestUserUpdatePassword(t *testing.T) {
 	}
 
 	u.Password = "foobar2"
-	if err = testDB.UpdateUser(u); err != nil {
+	if err = db.UpdateUser(u); err != nil {
 		t.Errorf("unable to update user: %v", err)
 	}
 
@@ -199,7 +223,7 @@ func TestUserUpdatePassword(t *testing.T) {
 		t.Errorf("changed password for account `user` is not `foobar2`")
 	}
 
-	u2, err := testDB.FindUserName("user")
+	u2, err := db.FindUserName("user")
 	if err != nil {
 		t.Fatalf("unable to load user %q: %v", "user", err)
 	}
@@ -207,4 +231,12 @@ func TestUserUpdatePassword(t *testing.T) {
 	if !u2.CheckPassword("foobar2") {
 		t.Errorf("changed password for account `user` in the db is not `foobar2`")
 	}
+}
+
+func TestDBUserUpdatePassword(t *testing.T) {
+	testUserUpdatePassword(t, testDB)
+}
+
+func TestMockDBUserUpdatePassword(t *testing.T) {
+	testUserUpdatePassword(t, NewMockDB(20, 5))
 }
