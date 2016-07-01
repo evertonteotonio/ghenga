@@ -3,7 +3,7 @@ package db
 import "testing"
 
 var searchTestPersons = []Person{
-	Person{
+	{
 		Name:         "Tamara Skibicki",
 		EmailAddress: "pit@ackermannsehls.org",
 		PhoneNumbers: []PhoneNumber{
@@ -16,7 +16,7 @@ var searchTestPersons = []Person{
 		CreatedAt: parseTime("2016-04-24T10:30:07+02:00"),
 		Version:   23,
 	},
-	Person{
+	{
 		Name:         "Mario Drees",
 		EmailAddress: "bela_freigang@herweg.com",
 		ChangedAt:    parseTime("2016-04-24T10:30:07+00:00"),
