@@ -16,9 +16,6 @@ dependencies:
   - postgresql
   - libpq-dev
   - python-psycopg2
-npm_dependencies:
-  - bower
-  - grunt-cli
 go_dependencies:
   - github.com/rubenv/modl-migrate/...
   - github.com/constabulary/gb/...

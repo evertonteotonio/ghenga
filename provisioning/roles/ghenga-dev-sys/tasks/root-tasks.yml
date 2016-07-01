@@ -16,5 +16,3 @@
   with_items: "{{ generate_locales }}"
 - lineinfile: "dest=/etc/environment line={{ item }}"
   with_items: "{{ default_system_env }}"
-- npm: "name={{ item }} global=yes"
-  with_items: "{{ npm_dependencies }}"
