@@ -57,15 +57,18 @@ func NewFakePerson(lang string) (*Person, error) {
 	return p, nil
 }
 
+// used for fake accounts, the password is "geheim"
+const fakeUserPasswordHash = "128$8$1$cdac66331ab817d18298486c5ec206fd$fd58ecfcf59fbe57bc579f6ec29cb8b757493ddca34d890658b2011de7d3472d"
+
 // NewFakeUser returns a User struct filled with fake data. The password is
-// always set to "geheim".
+// "geheim".
 func NewFakeUser(lang string) (*User, error) {
 	f, err := faker.New(lang)
 	if err != nil {
 		return nil, probe.Trace(err, lang)
 	}
 
-	return NewUser(f.UserName(), "geheim")
+	return NewUserWithHash(f.UserName(), fakeUserPasswordHash)
 }
 
 // InsertFakeData will populate the db with fake (but realistic) data. Among

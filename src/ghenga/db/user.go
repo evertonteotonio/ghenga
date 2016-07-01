@@ -61,14 +61,15 @@ func NewUser(login, password string) (*User, error) {
 	return u, nil
 }
 
-// NewAdminUser returns a new User with the admin flag set.
-func NewAdminUser(login, password string) (*User, error) {
-	u, err := NewUser(login, password)
-	if err != nil {
-		return nil, err
+// NewUserWithHash returns a new User initialized with the given password hash.
+func NewUserWithHash(login, hash string) (*User, error) {
+	u := &User{
+		Login:        login,
+		CreatedAt:    time.Now(),
+		ChangedAt:    time.Now(),
+		PasswordHash: hash,
 	}
 
-	u.Admin = true
 	return u, nil
 }
 
