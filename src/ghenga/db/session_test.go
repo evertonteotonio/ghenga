@@ -17,6 +17,11 @@ func TestSession(t *testing.T) {
 		if token == "" || len(token) != 2*tokenLength || token == "0000000000000000000000000000000000000000000000000000000000000000" {
 			t.Fatalf("invalid token %q", token)
 		}
+
+		err = testDB.Invalidate(s)
+		if err != nil {
+			t.Fatalf("invalidate() %v", err)
+		}
 	}
 }
 
@@ -24,7 +29,7 @@ func TestSessionSave(t *testing.T) {
 	var tokens []string
 
 	for i := 0; i < 10; i++ {
-		session, err := testDB.SaveNewSession("user", time.Duration(10*(i-1))*time.Second)
+		session, err := testDB.SaveNewSession("user", time.Duration(i)*time.Second)
 		if err != nil {
 			t.Fatalf("SaveNewSession() error %v", err)
 		}
@@ -46,7 +51,7 @@ func TestSessionSave(t *testing.T) {
 		t.Fatalf("error expire sessions: %v", err)
 	}
 
-	if n != 2 {
+	if n != 1 {
 		t.Errorf("expected 2 expired sessions, got %v", n)
 	}
 
