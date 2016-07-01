@@ -33,5 +33,5 @@ func (e Env) Logf(format string, args ...interface{}) {
 		return
 	}
 
-	e.Logger.Debug.Printf(format, args...)
+	e.Logger.Error.Printf(format, args...)
 }
