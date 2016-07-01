@@ -89,6 +89,12 @@ func init() {
 	scryptParameters = p
 }
 
+// WeakenPasswordHash configures weaker scrypt password hash parameters. This
+// must only be used in tests.
+func TestUseWeakPasswordHashParameters() {
+	scryptParameters = scrypt.Params{N: 128, R: 8, P: 1, SaltLen: 16, DKLen: 32}
+}
+
 // UpdatePasswordHash updates the password hash for u.
 func (u *User) UpdatePasswordHash(password string) error {
 	hash, err := scrypt.GenerateFromPassword([]byte(password), scryptParameters)
