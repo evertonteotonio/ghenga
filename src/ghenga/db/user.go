@@ -10,6 +10,7 @@ import (
 	"github.com/jmoiron/modl"
 )
 
+// UserDatabase stores user records.
 type UserDatabase interface {
 	FindUser(int64) (*User, error)
 	FindUserName(string) (*User, error)
