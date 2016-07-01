@@ -178,7 +178,7 @@ func testUserUpdate(t *testing.T, db DB) {
 
 	v := u.Version
 	u.Admin = !u.Admin
-	u.Version = 1
+	u.Version = 10000
 	if err = db.UpdateUser(u); err == nil {
 		t.Fatalf("update did not fail despite wrong version field")
 	}

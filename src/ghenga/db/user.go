@@ -91,8 +91,8 @@ func init() {
 	scryptParameters = p
 }
 
-// WeakenPasswordHash configures weaker scrypt password hash parameters. This
-// must only be used in tests.
+// TestUseWeakPasswordHashParameters configures weaker scrypt password hash
+// parameters. This must only be used in tests.
 func TestUseWeakPasswordHashParameters() {
 	scryptParameters = scrypt.Params{N: 128, R: 8, P: 1, SaltLen: 16, DKLen: 32}
 }
@@ -181,12 +181,13 @@ func (u *User) PreInsert(db modl.SqlExecutor) error {
 
 // PreUpdate is run before a person is saved into the database. It is used to
 // update the password hash when the field `Password` is set.
-func (u *User) PreUpdate(db modl.SqlExecutor) error {
-	if u.Password == "" {
-		return nil
+func (u *User) PreUpdate(db modl.SqlExecutor) (err error) {
+	if u.Password != "" {
+		err = u.UpdatePasswordHash(u.Password)
+		u.Password = ""
 	}
 
-	return u.UpdatePasswordHash(u.Password)
+	return err
 }
 
 // Validate checks whether the user record does not contain any errors.

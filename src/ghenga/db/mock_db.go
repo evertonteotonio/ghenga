@@ -25,19 +25,22 @@ func (db *MockDB) Close() error {
 
 // InsertUser adds a new user to the db.
 func (db *MockDB) InsertUser(u *User) error {
-	u.Version = 1
+	u.Version++
 	db.userID++
 	u.ID = db.userID
 	db.users = append(db.users, *u)
+
 	return nil
 }
 
 // ListUsers returns a list of all users.
 func (db *MockDB) ListUsers() ([]*User, error) {
-	list := make([]*User, len(db.users))
+	list := make([]*User, 0, len(db.users))
 	for _, u := range db.users {
-		list = append(list, &u)
+		user := u
+		list = append(list, &user)
 	}
+
 	return list, nil
 }
 
@@ -48,6 +51,15 @@ func (db *MockDB) UpdateUser(u *User) error {
 			if user.Version != u.Version {
 				return errors.New("wrong version")
 			}
+
+			if u.Password != "" {
+				err := u.UpdatePasswordHash(u.Password)
+				if err != nil {
+					return err
+				}
+				u.Password = ""
+			}
+
 			u.Version++
 			db.users[i] = *u
 			return nil
@@ -93,7 +105,7 @@ func (db *MockDB) FindUserName(name string) (*User, error) {
 
 // InsertPerson adds a new person to the db.
 func (db *MockDB) InsertPerson(p *Person) error {
-	p.Version = 1
+	p.Version++
 	db.personID++
 	p.ID = db.personID
 	db.people = append(db.people, *p)
@@ -102,7 +114,7 @@ func (db *MockDB) InsertPerson(p *Person) error {
 
 // ListPeople returns a list of all people in the database.
 func (db *MockDB) ListPeople() ([]*Person, error) {
-	list := make([]*Person, len(db.people))
+	list := make([]*Person, 0, len(db.people))
 	for _, u := range db.people {
 		list = append(list, &u)
 	}
