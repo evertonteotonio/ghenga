@@ -9,7 +9,9 @@ import (
 // MockDB implements the DB interface but only stores data in memory.
 type MockDB struct {
 	users    []User
+	userID   int64
 	people   []Person
+	personID int64
 	sessions []Session
 }
 
@@ -23,6 +25,9 @@ func (db *MockDB) Close() error {
 
 // InsertUser adds a new user to the db.
 func (db *MockDB) InsertUser(u *User) error {
+	u.Version = 1
+	db.userID++
+	u.ID = db.userID
 	db.users = append(db.users, *u)
 	return nil
 }
@@ -40,6 +45,10 @@ func (db *MockDB) ListUsers() ([]*User, error) {
 func (db *MockDB) UpdateUser(u *User) error {
 	for i, user := range db.users {
 		if user.ID == u.ID {
+			if user.Version != u.Version {
+				return errors.New("wrong version")
+			}
+			u.Version++
 			db.users[i] = *u
 			return nil
 		}
@@ -84,6 +93,9 @@ func (db *MockDB) FindUserName(name string) (*User, error) {
 
 // InsertPerson adds a new person to the db.
 func (db *MockDB) InsertPerson(p *Person) error {
+	p.Version = 1
+	db.personID++
+	p.ID = db.personID
 	db.people = append(db.people, *p)
 	return nil
 }
@@ -101,6 +113,10 @@ func (db *MockDB) ListPeople() ([]*Person, error) {
 func (db *MockDB) UpdatePerson(p *Person) error {
 	for i, person := range db.people {
 		if person.ID == p.ID {
+			if person.Version != p.Version {
+				return errors.New("wrong version")
+			}
+			p.Version++
 			db.people[i] = *p
 			return nil
 		}
