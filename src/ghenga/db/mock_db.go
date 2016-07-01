@@ -134,10 +134,12 @@ func (db *MockDB) FindPerson(id int64) (*Person, error) {
 
 // FuzzyFindPersons returns all people matching query.
 func (db *MockDB) FuzzyFindPersons(query string) ([]*Person, error) {
+	query = strings.ToLower(query)
 	var list []*Person
 	for _, person := range db.people {
-		if strings.Contains(strings.ToLower(person.Name), strings.ToLower(query)) {
-			list = append(list, &person)
+		if strings.Contains(strings.ToLower(person.Name), query) {
+			p := person
+			list = append(list, &p)
 		}
 	}
 
