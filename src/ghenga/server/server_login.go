@@ -114,7 +114,7 @@ func Invalidate(ctx context.Context, env *Env, res http.ResponseWriter, req *htt
 	return env.DB.Invalidate(session)
 }
 
-// LoginHandler adds routes to the for ghenga API in the given enviroment to r.
+// LoginHandler adds routes to the for ghenga API in the given environment to r.
 func LoginHandler(ctx context.Context, env *Env, r *mux.Router) {
 	r.Handle("/api/login/token", Handle(ctx, env, Login)).Methods("GET")
 	r.Handle("/api/login/info", Handle(ctx, env, Info)).Methods("GET")

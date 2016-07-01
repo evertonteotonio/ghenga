@@ -21,7 +21,7 @@ func SearchPerson(ctx context.Context, env *Env, res http.ResponseWriter, req *h
 	return httpWriteJSON(res, http.StatusOK, people)
 }
 
-// SearchHandler adds routes to the for ghenga API in the given enviroment to r.
+// SearchHandler adds routes to the for ghenga API in the given environment to r.
 func SearchHandler(ctx context.Context, env *Env, r *mux.Router) {
 	r.Handle("/api/search/person", Handle(ctx, env, RequireAuth(SearchPerson))).Methods("GET")
 }

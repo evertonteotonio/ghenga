@@ -27,7 +27,7 @@ func (e Env) Debugf(format string, args ...interface{}) {
 	e.Logger.Debug.Printf("[debug] "+format, args...)
 }
 
-// Logf an infomational message.
+// Logf an informational message.
 func (e Env) Logf(format string, args ...interface{}) {
 	if e.Logger.Error == nil {
 		return

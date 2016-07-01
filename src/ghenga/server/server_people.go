@@ -134,7 +134,7 @@ func DeletePerson(ctx context.Context, env *Env, wr http.ResponseWriter, req *ht
 	return httpWriteJSON(wr, http.StatusOK, nil)
 }
 
-// PeopleHandler adds routes for ghenga API in the given enviroment to r.
+// PeopleHandler adds routes for ghenga API in the given environment to r.
 func PeopleHandler(ctx context.Context, env *Env, r *mux.Router) {
 	r.Handle("/api/person", Handle(ctx, env, RequireAuth(ListPeople))).Methods("GET")
 	r.Handle("/api/person", Handle(ctx, env, RequireAuth(CreatePerson))).Methods("POST")
