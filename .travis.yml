@@ -34,6 +34,6 @@ install:
 script:
   - gb build
   # run tests sequentially, we only have one database
-  - GHENGA_TEST_DB="host=localhost user=ghenga password=ghenga dbname=ghenga sslmode=disable" gb test -P 1
+  - GHENGA_TEST_DB="host=localhost user=ghenga password=ghenga dbname=ghenga sslmode=disable" gb test
   - diff <(GOPATH="$PWD:$PWD/vendor" goimports -d ./src) <(printf "")
   - diff <(golint ./src/...) <(printf "")
